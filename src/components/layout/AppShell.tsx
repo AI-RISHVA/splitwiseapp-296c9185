@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
@@ -8,13 +8,16 @@ import {
   Plus,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DEMO_MODE } from "@/lib/config";
 import { demoUser } from "@/lib/demo-data";
+import { getToken } from "@/lib/api-client";
+import { logout } from "@/lib/auth";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -25,6 +28,7 @@ const nav = [
 ] as const;
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  const navigate = useNavigate();
   return (
     <div className="flex h-full flex-col gap-6 p-4">
       <Link to="/" onClick={onNavigate} className="flex items-center gap-3 px-2 py-1">
@@ -56,6 +60,17 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="rounded-xl border border-sidebar-border bg-card p-3">
         <p className="text-sm font-medium">{demoUser.name}</p>
         <p className="truncate text-xs text-muted-foreground">{demoUser.email}</p>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-2 w-full justify-start gap-2 px-2"
+          onClick={async () => {
+            await logout();
+            navigate({ to: "/auth" });
+          }}
+        >
+          <LogOut className="size-4" /> Logout
+        </Button>
       </div>
     </div>
   );
@@ -73,6 +88,10 @@ export function AppShell({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!getToken()) navigate({ to: "/auth" });
+  }, [navigate]);
 
   return (
     <div className="flex min-h-screen bg-background">
