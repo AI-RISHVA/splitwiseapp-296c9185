@@ -118,7 +118,10 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const err = validate();
-    if (err) return toast.error(err);
+    if (err) {
+      toast.error(err);
+      return;
+    }
     setLoading(true);
     try {
       await register(f);
